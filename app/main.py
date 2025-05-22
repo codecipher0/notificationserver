@@ -20,9 +20,11 @@ SMTP_CONFIG = {
     "smtp_pass": os.getenv("SMTP_PASS", "")
 }
 
+SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
+
 # Register adapters
 notifier.register_adapter("email", EmailAdapter(**SMTP_CONFIG))
-notifier.register_adapter("slack", SlackAdapter())
+notifier.register_adapter("slack", SlackAdapter(webhook_url=SLACK_WEBHOOK_URL))
 notifier.register_adapter("telegram", TelegramAdapter())
 notifier.register_adapter("sms", SMSAdapter())
 
