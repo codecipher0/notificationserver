@@ -8,7 +8,8 @@ class Notifier:
     def register_adapter(self, name: str, adapter: NotificationAdapter):
         self.adapters[name] = adapter
 
-    def notify(self, channel: str, recipient: str, message: str):
-        if channel not in self.adapters:
+    async def notify(self, channel: str, recipient: str, message: str):
+        adapter = self.adapters.get(channel)
+        if not adapter:
             raise ValueError(f"No adapter registered for channel '{channel}'")
-        self.adapters[channel].send(recipient, message)
+        await adapter.send(recipient, message)

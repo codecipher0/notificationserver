@@ -1,25 +1,40 @@
 from fastapi import FastAPI, HTTPException
 from notifier import Notifier
 from models import NotificationRequest
+from template_renderer import render_notification
 
 from adapters.email_adapter import EmailAdapter
 from adapters.slack_adapter import SlackAdapter
 from adapters.telegram_adapter import TelegramAdapter
 from adapters.sms_adapter import SMSAdapter
 
+import os
+
 app = FastAPI()
 notifier = Notifier()
 
+SMTP_CONFIG = {
+    "smtp_host": os.getenv("SMTP_HOST", "smtp.gmail.com"),
+    "smtp_port": int(os.getenv("SMTP_PORT", 465)),
+    "smtp_user": os.getenv("SMTP_USER", "rskirong@gmail.com"),
+    "smtp_pass": os.getenv("SMTP_PASS", "")
+}
+
 # Register adapters
-notifier.register_adapter("email", EmailAdapter())
+notifier.register_adapter("email", EmailAdapter(**SMTP_CONFIG))
 notifier.register_adapter("slack", SlackAdapter())
 notifier.register_adapter("telegram", TelegramAdapter())
 notifier.register_adapter("sms", SMSAdapter())
 
 @app.post("/notify")
-def send_notification(request: NotificationRequest):
+async def send_notification(request: NotificationRequest):
     try:
-        notifier.notify(request.channel, request.recipient, request.message)
+        rendered_message = render_notification(
+            channel=request.channel,
+            recipient=request.recipient,
+            message=request.message
+        )
+        await notifier.notify(request.channel, request.recipient, rendered_message)
         return {"status": "sent", "channel": request.channel}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
