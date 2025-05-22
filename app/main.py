@@ -22,6 +22,12 @@ SMTP_CONFIG = {
 
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 
+sms_adapter = SMSAdapter(
+    account_sid=os.getenv("TWILIO_ACCOUNT_SID", ""),
+    auth_token=os.getenv("TWILIO_AUTH_TOKEN", ""),
+    from_number=os.getenv("TWILIO_PHONE_NUMBER", ")
+)
+
 # Register adapters
 notifier.register_adapter("email", EmailAdapter(**SMTP_CONFIG))
 notifier.register_adapter("slack", SlackAdapter(webhook_url=SLACK_WEBHOOK_URL))
