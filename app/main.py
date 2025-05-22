@@ -25,14 +25,16 @@ SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 sms_adapter = SMSAdapter(
     account_sid=os.getenv("TWILIO_ACCOUNT_SID", ""),
     auth_token=os.getenv("TWILIO_AUTH_TOKEN", ""),
-    from_number=os.getenv("TWILIO_PHONE_NUMBER", ")
+    from_number=os.getenv("TWILIO_PHONE_NUMBER", "")
 )
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 
 # Register adapters
 notifier.register_adapter("email", EmailAdapter(**SMTP_CONFIG))
 notifier.register_adapter("slack", SlackAdapter(webhook_url=SLACK_WEBHOOK_URL))
-notifier.register_adapter("telegram", TelegramAdapter())
-notifier.register_adapter("sms", SMSAdapter())
+notifier.register_adapter("telegram", TelegramAdapter(bot_token=TELEGRAM_BOT_TOKEN))
+notifier.register_adapter("sms", sms_adapter)
 
 @app.post("/notify")
 async def send_notification(request: NotificationRequest):
